@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[1]:
+# In[ ]:
 
 """
     Script Name : AdNonAdDataClassfier.py
@@ -12,7 +12,7 @@
 """
 
 
-# In[2]:
+# In[ ]:
 
 import numpy as np
 import csv
@@ -21,7 +21,7 @@ import math
 get_ipython().magic('matplotlib inline')
 
 
-# In[3]:
+# In[ ]:
 
 adDataCsv = csv.reader(open("../data/ad.data","r"))
 
@@ -29,15 +29,14 @@ headers = adDataCsv.__next__()
 len(headers)
 
 
-# In[4]:
+# In[ ]:
 
 ## Seperate training and test data
 ## Training data is the data will no missing data
 ## Test data is the data with missing data
-
+similar_index = []
 train_data = []
 test_data = []
-similar_index = []
 
 for row in adDataCsv:
     if row[0].strip() == '?' or row[1].strip() == '?' or row[2].strip() == '?':
@@ -53,12 +52,12 @@ for row in test_data:
     
     
 for row in train_data:
-    csv_train_data.writerow(row)   
+    csv_train_data.writerow(row)
     
-print("done")    
+print("done1")    
 
 
-# In[5]:
+# In[ ]:
 
 ## Calculating score matrix for each test data
 for row_test in test_data:
@@ -74,12 +73,12 @@ for row_test in test_data:
     similar_index.append(score.index(max(score)))
 
 
-# In[6]:
+# In[ ]:
 
 print(similar_index)
 
 
-# In[7]:
+# In[ ]:
 
 ## Assigning Height, Width and aratio same as that of the training data with the highest match
 
@@ -91,7 +90,7 @@ for i in range(0,len(test_data)):
     
 
 
-# In[8]:
+# In[ ]:
 
 ## Append the test data with the training data
 full_data = []
@@ -104,38 +103,38 @@ for row in test_data:
 
 
 
-# In[9]:
+# In[ ]:
 
 print(len(full_data))
 
 
-# In[11]:
+# In[ ]:
 
-## Discretizing the real values
+## Discretizing the real values ** Start coding from here  ** Seems wrong to me
 ## Finding max height and width
-max = [0,0,0]
+maxim = [0,0,0]
 n_new_feature = [0,0,0]
 for row in full_data:
-    if max[0] < float(row[0].strip()):
-        max[0] = float(row[0].strip())
-        n_new_feature[0] = math.ceil(max[0]/10)
-    if max[1] < float(row[1].strip()):
-        max[1] = float(row[1].strip())
-        n_new_feature[1] = math.ceil(max[1]/10)
-    if max[2] < float(row[2].strip()):
-        max[2] = float(row[2].strip())
-        n_new_feature[2] = math.ceil(max[2]/10)
+    if maxim[0] < float(row[0].strip()):
+        maxim[0] = float(row[0].strip())
+        n_new_feature[0] = math.ceil(maxim[0]/10)
+    if maxim[1] < float(row[1].strip()):
+        maxim[1] = float(row[1].strip())
+        n_new_feature[1] = math.ceil(maxim[1]/10)
+    if maxim[2] < float(row[2].strip()):
+        maxim[2] = float(row[2].strip())
+        n_new_feature[2] = math.ceil(maxim[2]/10)
         
-## Max will decide the number of new features to be added
+## Maxim will decide the number of new features to be added
 
 
-# In[13]:
+# In[ ]:
 
-print(max)
-print(n_new_feature)
+"""print(maxim)
+print(n_new_feature)"""
 
 
-# In[14]:
+# In[ ]:
 
 disc_full_data = []
 single_row = []
@@ -152,9 +151,14 @@ for row in full_data:
     
 
 
-# In[15]:
+# In[ ]:
 
 print(disc_full_data[0])
+
+
+# In[ ]:
+
+
 
 
 # In[ ]:
