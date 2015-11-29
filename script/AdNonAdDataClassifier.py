@@ -44,7 +44,7 @@ for row in adDataCsv:
     else:
         train_data.append(row)        
         
-csv_train_data = csv.writer(open("../data/train_ad.csv","w"),dialect = 'excel')
+"""csv_train_data = csv.writer(open("../data/train_ad.csv","w"),dialect = 'excel')
 csv_test_data = csv.writer(open("../data/test_ad.csv","w"),dialect = 'excel')
 
 for row in test_data:
@@ -53,8 +53,8 @@ for row in test_data:
     
 for row in train_data:
     csv_train_data.writerow(row)
-    
-print("done1")    
+"""   
+print("done")    
 
 
 # In[ ]:
@@ -105,55 +105,78 @@ for row in test_data:
 
 # In[ ]:
 
-print(len(full_data))
+
 
 
 # In[ ]:
 
 ## Discretizing the real values ** Start coding from here  ** Seems wrong to me
 ## Finding max height and width
-maxim = [0,0,0]
-n_new_feature = [0,0,0]
-for row in full_data:
-    if maxim[0] < float(row[0].strip()):
-        maxim[0] = float(row[0].strip())
-        n_new_feature[0] = math.ceil(maxim[0]/10)
-    if maxim[1] < float(row[1].strip()):
-        maxim[1] = float(row[1].strip())
-        n_new_feature[1] = math.ceil(maxim[1]/10)
-    if maxim[2] < float(row[2].strip()):
-        maxim[2] = float(row[2].strip())
-        n_new_feature[2] = math.ceil(maxim[2]/10)
-        
-## Maxim will decide the number of new features to be added
+"""for i in range(0,len(full_data)):
+   temp1=[0]*14
+   temp2=[0]*14
+   temp3=[0]*14
+
+   val1=math.floor(int(full_data[i][0])/50)
+   temp1[val1]=1
+   full_data[i]=full_data[i]+temp1
+   val2=math.floor(int(full_data[i][1])/50)
+   temp2[val2]=1
+   full_data[i]=full_data[i]+temp2
+   val3=math.floor(float(full_data[i][2])/5)
+   temp3[val3]=1
+   full_data[i]=full_data[i]+temp3"""
 
 
 # In[ ]:
 
-"""print(maxim)
-print(n_new_feature)"""
+for i in range(0,len(full_data)):
+    temp1=[0]*14
+    temp2=[0]*14
+    temp3=[0]*14
 
-
-# In[ ]:
-
-disc_full_data = []
-single_row = []
-for row in full_data:
-    ind = math.floor(float(row[0].strip()))
-    for j in range(0,3):
-        for i in range(0,n_new_feature[j]):
-            if i == ind:
-                single_row.append(1)
-            else:
-                single_row.append(0)
-    single_row.append(row[2:len(row)])
-    disc_full_data.append(single_row)
+    val1=math.floor(int(full_data[i][0])/50)
+    temp1[val1]=1
+   
+    val2=math.floor(int(full_data[i][1])/50)
+    temp2[val2]=1
+   
+    val3=math.floor(float(full_data[i][2])/5)
+    temp3[val3]=1
     
+    full_data[i]=temp3+full_data[i][3:]
+    full_data[i]=temp2+full_data[i]
+    full_data[i]=temp1+full_data[i]
 
 
 # In[ ]:
 
-print(disc_full_data[0])
+print(full_data[0])
+
+
+# In[ ]:
+
+### logic for removing the first 3 columns and ad = 5 and non_ad = -5
+## since it is Jai's lucky number
+i = 0
+full_bin_data = []
+
+for row in full_data:
+    row_dash = []
+    for i in range(0,len(row)):
+        if row[i] == "ad.":
+            row_dash.append('5')
+        else:
+            if row[i] == "nonad." :
+                row_dash.append('-5')
+            else:
+                row_dash.append(row[i])
+    full_bin_data.append(row_dash)
+
+
+# In[ ]:
+
+print(full_bin_data[13])
 
 
 # In[ ]:
