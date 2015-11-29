@@ -1,16 +1,11 @@
 
 # coding: utf-8
 
-# In[ ]:
-
-"""
-    Script Name : AdNonAdDataClassfier.py
-    Author : Sreejith Menon
-    Date : 11/07/2015
-    
-    Version: 1.0 Initial Draft
-"""
-
+# ### Script Name : AdNonAdDataClassfier.p
+# #### Author : Sreejith Menon, Jairaj Shaktawat, Surbhi Arora, Pooja Donekal, Shvetha Suvarna
+# #### Date : 11/07/2015
+# #### Version: 1.0 Initial Draft
+# ####                 2.0 Added Logic for Discretization
 
 # In[ ]:
 
@@ -18,6 +13,11 @@ import numpy as np
 import csv
 import matplotlib.pyplot as plt
 import math
+import pandas as pd
+import statsmodels.api as sm
+import pylab as pl
+from sklearn.linear_model import LogisticRegression
+
 get_ipython().magic('matplotlib inline')
 
 
@@ -29,11 +29,13 @@ headers = adDataCsv.__next__()
 len(headers)
 
 
+# ## Seperate training and test data
+# ### Training data is the data will no missing data
+# ### Test data is the data with missing data
+
 # In[ ]:
 
-## Seperate training and test data
-## Training data is the data will no missing data
-## Test data is the data with missing data
+
 similar_index = []
 train_data = []
 test_data = []
@@ -43,19 +45,11 @@ for row in adDataCsv:
         test_data.append(row)
     else:
         train_data.append(row)        
-        
-"""csv_train_data = csv.writer(open("../data/train_ad.csv","w"),dialect = 'excel')
-csv_test_data = csv.writer(open("../data/test_ad.csv","w"),dialect = 'excel')
 
-for row in test_data:
-    csv_test_data.writerow(row)
-    
-    
-for row in train_data:
-    csv_train_data.writerow(row)
-"""   
 print("done")    
 
+
+# ## Imputing the missing data using k-NN
 
 # In[ ]:
 
@@ -74,6 +68,8 @@ for row_test in test_data:
 
 
 # In[ ]:
+
+print(score.index((max(score))))
 
 print(similar_index)
 
@@ -103,30 +99,8 @@ for row in test_data:
 
 
 
-# In[ ]:
-
-
-
-
-# In[ ]:
-
-## Discretizing the real values ** Start coding from here  ** Seems wrong to me
-## Finding max height and width
-"""for i in range(0,len(full_data)):
-   temp1=[0]*14
-   temp2=[0]*14
-   temp3=[0]*14
-
-   val1=math.floor(int(full_data[i][0])/50)
-   temp1[val1]=1
-   full_data[i]=full_data[i]+temp1
-   val2=math.floor(int(full_data[i][1])/50)
-   temp2[val2]=1
-   full_data[i]=full_data[i]+temp2
-   val3=math.floor(float(full_data[i][2])/5)
-   temp3[val3]=1
-   full_data[i]=full_data[i]+temp3"""
-
+# ## Logic for discretizing the continous field values.
+# ### Each of the real values divided into 14 
 
 # In[ ]:
 
@@ -151,24 +125,23 @@ for i in range(0,len(full_data)):
 
 # In[ ]:
 
-print(full_data[0])
+print(full_data[1][0])
 
 
 # In[ ]:
 
-### logic for removing the first 3 columns and ad = 5 and non_ad = -5
-## since it is Jai's lucky number
+### logic for removing the first 3 columns and ad = 1 and non_ad = 0
+
 i = 0
 full_bin_data = []
-
 for row in full_data:
     row_dash = []
     for i in range(0,len(row)):
         if row[i] == "ad.":
-            row_dash.append('5')
+            row_dash.append(1)
         else:
-            if row[i] == "nonad." :
-                row_dash.append('-5')
+            if row[i] == "nonad.":
+                row_dash.append(0)
             else:
                 row_dash.append(row[i])
     full_bin_data.append(row_dash)
@@ -176,15 +149,139 @@ for row in full_data:
 
 # In[ ]:
 
-print(full_bin_data[13])
+headers_back = headers
+
+headers_back.remove('height')
+headers_back.remove('width')
+headers_back.remove('aratio')
+
+headers_new = []
+
+for i in range(0,14):
+    headers_new.append('height%d'%i)
+
+for i in range(0,14):
+    headers_new.append('width%d'%i)    
+    
+for i in range(0,14):
+    headers_new.append('aratio%d'%i) 
+    
+for row in headers_back:
+    headers_new.append(row)
+
 
 
 # In[ ]:
 
+## Writing the data to a csv file
+
+print(len(full_bin_data))
+
+fl = open("../data/ready_for_logistic.csv","w")
+ready_full_data = csv.writer(fl,dialect = 'excel',lineterminator='\n')
+ready_full_data.writerow(headers_new)
+for row in full_bin_data:
+    ready_full_data.writerow(row)
+    
+fl.close()    
 
 
+# #### Cleansing data to convert everything to float values 
 
 # In[ ]:
 
+full_fl = csv.reader(open("../data/ready_for_logistic.csv","r"))
+headers = full_fl.__next__()
+
+fl = open("../data/ready_for_logistic_clean.csv","w")
+ready_full_data = csv.writer(fl,dialect = 'excel',lineterminator='\n')
+ready_full_data.writerow(headers)
+count = 0
+for row in full_fl:
+    clean_row = []
+    for col in row:
+        if(col == '?'):
+            clean_row.append(0)
+            count += 1
+        else:
+            clean_row.append(int(col.strip()))
+        
+    ready_full_data.writerow(clean_row)
+
+fl.close()
+
+print(count)
+
+
+# ## Getting the data ready for logistic regression
+
+# In[ ]:
+def logistic_predictor(percent):
+## definition begin    
+    dta = pd.read_csv('../data/ready_for_logistic_clean.csv')
+    
+    #printing a few statistics
+    #print(dta.std())
+    div_percentage = percent/100
+    train_test_boundary = math.floor(div_percentage*len(dta))
+    end_boundary = len(dta)
+    train_data = dta[:train_test_boundary]
+    test_data = dta[train_test_boundary:]
+     
+    
+    full_fl = csv.reader(open("../data/ready_for_logistic_clean.csv","r"))
+    headers = full_fl.__next__()
+    data = train_data[headers]
+    test_data = test_data[headers]
+    data['intercept'] = 1.0
+    test_data['intercept'] = 1.0
+    #print(data.head())
+    
+    headers_1 = headers
+    headers_1.remove('class')
+    headers_1.append('intercept')
+    
+    
+    # ## Learning using logistic regression
+    
+    
+    logistic = LogisticRegression()
+    y = data['class']
+    X = data[headers_1]
+    logistic.fit(X,y)
+    
+    
+    # ## Predicition made on the test data
+    
+    y = test_data['class']
+    actual_class_val = []
+    for i in range(train_test_boundary,end_boundary):
+        actual_class_val.append(y[i])
+    
+    # Predicted value
+    predictions = logistic.predict(test_data[headers_1])   
+    
+    
+    ## Calculating accuracy of training data set
+    
+    count = 0
+    
+    for i in range(0,(end_boundary-train_test_boundary)):
+        if predictions[i] == actual_class_val[i]:
+            count += 1
+    
+    return count*100/(end_boundary-train_test_boundary)
+
+##definition end
+
+x=[]
+y=[]
+
+for i in range(50,100):
+    x.append(i)
+    y.append(logistic_predictor(i))
+    
+plt.plot(x,y)
+plt.show()    
 
 
