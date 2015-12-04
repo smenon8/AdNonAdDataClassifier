@@ -1,8 +1,9 @@
 
 # coding: utf-8
 
-# In[1]:
+# In[12]:
 
+import sys
 import numpy as np
 import csv
 import matplotlib.pyplot as plt
@@ -11,12 +12,46 @@ import pandas as pd
 import statsmodels.api as sm
 import pylab as pl
 from sklearn.linear_model import LogisticRegression
+import random
 
 
-# In[ ]:
+# In[13]:
+
+def randomize_file():
+    f = open('../data/ready_for_logistic_clean.csv')
+    reader = csv.reader(f)
+    headers = reader.__next__()
+
+    dt = []
+    for row in reader:
+        dt.append(row)
+
+    f.close()
+
+    rand = random.sample(range(0, len(dt)), len(dt))
+
+    rand_data = []
+    #print(max(rand))
+
+    for i in rand:
+        #print(rand[i])
+        rand_data.append(dt[rand[i]])
+
+    fl = open("../data/ready_for_logistic_clean_1.csv","w")
+    ready_full_data = csv.writer(fl,dialect = 'excel',lineterminator='\n')
+    ready_full_data.writerow(headers)
+    for row in rand_data:
+        ready_full_data.writerow(row)
+
+    fl.close() 
+    return "done"
+
+
+# In[14]:
 
 def logistic_regression(percent):
-    dta = pd.read_csv('../data/ready_for_logistic_clean.csv')
+    randomize_file()
+    dta = pd.read_csv('../data/ready_for_logistic_clean_1.csv')
     
     #printing a few statistics
     #print(dta.std())
@@ -69,7 +104,7 @@ def logistic_regression(percent):
     return count*100/(end_boundary-train_test_boundary)
 
 
-# In[ ]:
+# In[27]:
 
 x = []
 y = []
@@ -77,7 +112,42 @@ for i in range(40,100):
     x.append(i)
     y.append(logistic_regression(i))
     print(i)
-    
-plt.plot(x,y)
-plt.show()
+
+
+# In[ ]:
+
+sys.modules[__name__].__dict__.clear()
+
+
+# In[32]:
+
+
+ax = pl.subplot(111)
+
+ax.set_xlim([40,100])
+ax.set_ylim([70, 100])
+pl.xlabel('Training data percentage', fontsize=18)
+pl.ylabel('Prediction Accuracy', fontsize=16)
+pl.plot(x,y)
+pl.show()
+
+
+# In[33]:
+
+max(y)
+
+
+# In[34]:
+
+min(y)
+
+
+# In[39]:
+
+np.mean(y)
+
+
+# In[ ]:
+
+
 
