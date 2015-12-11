@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[12]:
+# In[1]:
 
 import sys
 import numpy as np
@@ -15,7 +15,7 @@ from sklearn.linear_model import LogisticRegression
 import random
 
 
-# In[13]:
+# In[2]:
 
 def randomize_file():
     f = open('../data/ready_for_logistic_clean.csv')
@@ -47,10 +47,9 @@ def randomize_file():
     return "done"
 
 
-# In[14]:
+# In[3]:
 
 def logistic_regression(percent):
-    randomize_file()
     dta = pd.read_csv('../data/ready_for_logistic_clean_1.csv')
     
     #printing a few statistics
@@ -104,11 +103,16 @@ def logistic_regression(percent):
     return count*100/(end_boundary-train_test_boundary)
 
 
-# In[27]:
+# In[4]:
+
+randomize_file()
+
+
+# In[ ]:
 
 x = []
 y = []
-for i in range(40,100):
+for i in range(1,100):
     x.append(i)
     y.append(logistic_regression(i))
     print(i)
@@ -116,33 +120,28 @@ for i in range(40,100):
 
 # In[ ]:
 
-sys.modules[__name__].__dict__.clear()
-
-
-# In[32]:
-
 
 ax = pl.subplot(111)
 
 ax.set_xlim([40,100])
-ax.set_ylim([70, 100])
+ax.set_ylim([80, 100])
 pl.xlabel('Training data percentage', fontsize=18)
 pl.ylabel('Prediction Accuracy', fontsize=16)
 pl.plot(x,y)
 pl.show()
 
 
-# In[33]:
+# In[ ]:
 
 max(y)
 
 
-# In[34]:
+# In[ ]:
 
 min(y)
 
 
-# In[39]:
+# In[ ]:
 
 np.mean(y)
 
